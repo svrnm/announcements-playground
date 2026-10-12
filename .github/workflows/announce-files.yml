@@ -24,12 +24,19 @@ jobs:
       - id: files
         env:
           BEFORE: ${{ github.event.before }}
+          MODE: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+          CHANNELS: ${{ vars.ANNOUNCEMENT_CHANNELS }}
         run: |
           python3 - <<'PY'
           import json
           import os
           from pathlib import Path
           import subprocess
+
+          # Buffer is drafts-only in this playground until draft behavior is verified.
+          buffer = {"linkedin", "bluesky", "mastodon"} & set(json.loads(os.environ["CHANNELS"]))
+          if os.environ["MODE"] == "publish" and buffer:
+              raise SystemExit(f"publish is not allowed for Buffer channels: {sorted(buffer)}")
 
           root = Path(".announcements").resolve()
           if set(os.environ["BEFORE"]) == {"0"}:

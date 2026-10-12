@@ -31,11 +31,18 @@ jobs:
       - id: read
         env:
           INPUT_FILE: ${{ inputs.file }}
+          MODE: ${{ inputs.mode }}
+          CHANNELS: ${{ inputs.channels || vars.ANNOUNCEMENT_CHANNELS }}
         run: |
           python3 - <<'PY'
           import json
           import os
           from pathlib import Path
+
+          # Buffer is drafts-only in this playground until draft behavior is verified.
+          buffer = {"linkedin", "bluesky", "mastodon"} & set(json.loads(os.environ["CHANNELS"]))
+          if os.environ["MODE"] == "publish" and buffer:
+              raise SystemExit(f"publish is not allowed for Buffer channels: {sorted(buffer)}")
 
           path = Path(os.environ["INPUT_FILE"]).resolve()
           if path.parent != Path(".announcements").resolve() or path.suffix != ".json":

@@ -16,6 +16,10 @@ such as `opentelemetry.io`, exposes in its logs, job summaries, and artifacts.
   `.announcements/` on `main`. It uses the mode in the
   `ANNOUNCEMENT_AUTO_MODE` variable and falls back to `dry-run`.
 
+Both workflows refuse `publish` when a Buffer channel (`linkedin`, `bluesky`,
+`mastodon`) is selected. Buffer stays drafts-only until its draft behavior is
+verified, and the queues of the test channels are paused as a second safeguard.
+
 Both call the workflow at `@feat/announcement-workflow` so changes on the
 branch can be tested without re-pinning.
 
