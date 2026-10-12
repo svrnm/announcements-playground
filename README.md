@@ -33,7 +33,6 @@ service as its test account becomes available.
 | `ANNOUNCEMENT_CHANNELS` | `["slack","groupsio"]` |
 | `ANNOUNCEMENT_TARGETS` | `{"slack":["C0123456789"],"groupsio":[12345]}` |
 | `ANNOUNCEMENT_AUTO_MODE` | `draft` (unset means `dry-run`) |
-| `REDDIT_USER_AGENT` | `github-actions:otel-announcements-test:0.1 (by /u/YOUR_TEST_BOT)` |
 
 ## Test destinations
 
@@ -44,4 +43,3 @@ service as its test account becomes available.
 | Buffer: Bluesky | Test account | Not set up |
 | Buffer: Mastodon | Test account | Not set up |
 | Buffer: LinkedIn | Test Page (draft only) | Not set up |
-| Reddit | Private test subreddit | Not set up (API approval needed) |
