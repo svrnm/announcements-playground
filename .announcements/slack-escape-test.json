@@ -1,0 +1,5 @@
+{
+  "title": "Slack escaping test",
+  "text": "Slack escaping test. Ampersand: & | Tag: <b>not bold</b> | Mention: <!here> (should NOT notify anyone)",
+  "url": "https://github.com/svrnm/announcements-playground"
+}
