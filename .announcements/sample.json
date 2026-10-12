@@ -5,9 +5,6 @@
   "overrides": {
     "bluesky": {
       "text": "Test post from the announcements playground. Please ignore."
-    },
-    "reddit": {
-      "title": "[TEST] Announcements playground"
     }
   }
 }
