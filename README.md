@@ -39,7 +39,7 @@ service as its test account becomes available.
 
 | Service | Destination | Status |
 | ------- | ----------- | ------ |
-| Slack | Test workspace, 2 channels | Not set up |
+| Slack | Test channel in CNCF Slack via incoming webhook | Not set up |
 | Groups.io | Moderated test group on groups.io | Not set up |
 | Buffer: Bluesky | Test account | Not set up |
 | Buffer: Mastodon | Test account | Not set up |
