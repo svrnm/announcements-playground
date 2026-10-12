@@ -1,0 +1,13 @@
+{
+  "title": "Announcements playground test",
+  "text": "This is a test announcement from the shared-workflows announcements playground. Please ignore.",
+  "url": "https://github.com/svrnm/announcements-playground",
+  "overrides": {
+    "bluesky": {
+      "text": "Test post from the announcements playground. Please ignore."
+    },
+    "reddit": {
+      "title": "[TEST] Announcements playground"
+    }
+  }
+}

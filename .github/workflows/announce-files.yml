@@ -1,0 +1,82 @@
+name: Announce new files
+
+# Mirrors the "Announce new files" example in the shared-workflows
+# announcements README: new files on main are announced in draft mode.
+on:
+  push:
+    branches: [main]
+    paths: [".announcements/*.json"]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      entries: ${{ steps.files.outputs.entries }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - id: files
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = Path(".announcements").resolve()
+          if set(os.environ["BEFORE"]) == {"0"}:
+              paths = sorted(str(p) for p in Path(".announcements").glob("*.json"))
+          else:
+              result = subprocess.check_output([
+                  "git", "diff", "--name-only", "--diff-filter=A", "-z",
+                  os.environ["BEFORE"], os.environ["GITHUB_SHA"],
+                  "--", ".announcements/*.json",
+              ])
+              paths = [p for p in result.decode().split("\0") if p]
+          entries = []
+          for index, name in enumerate(paths):
+              path = Path(name).resolve()
+              if path.parent != root or path.suffix != ".json":
+                  raise ValueError("Expected a JSON file directly under .announcements/")
+              entries.append({
+                  "name": f"announcement-{index}",
+                  "content": json.loads(path.read_text(encoding="utf-8")),
+              })
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("entries=" + json.dumps(entries) + "\n")
+          PY
+
+  announce:
+    needs: prepare
+    if: needs.prepare.outputs.entries != '[]'
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        entry: ${{ fromJSON(needs.prepare.outputs.entries) }}
+    # Tracks the branch under test; production callers pin a commit SHA.
+    uses: svrnm/shared-workflows/.github/workflows/announcements.yml@feat/announcement-workflow
+    with:
+      announcement: ${{ toJSON(matrix.entry.content) }}
+      channels: ${{ vars.ANNOUNCEMENT_CHANNELS }}
+      targets: ${{ vars.ANNOUNCEMENT_TARGETS }}
+      # The README example drafts automatically; stay in dry-run until accounts exist.
+      mode: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+      groupsio_host: groups.io
+      report_name: ${{ matrix.entry.name }}
+      reddit_user_agent: ${{ vars.REDDIT_USER_AGENT }}
+    secrets:
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GROUPSIO_API_KEY: ${{ secrets.GROUPSIO_API_KEY }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_REFRESH_TOKEN: ${{ secrets.REDDIT_REFRESH_TOKEN }}

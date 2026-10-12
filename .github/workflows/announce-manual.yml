@@ -1,0 +1,65 @@
+name: Announce manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: Announcement JSON path under .announcements/
+        default: .announcements/sample.json
+        type: string
+      channels:
+        description: JSON array of services (empty uses ANNOUNCEMENT_CHANNELS)
+        default: ""
+        type: string
+      mode:
+        type: choice
+        options: [dry-run, draft, publish]
+        default: dry-run
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      content: ${{ steps.read.outputs.content }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: read
+        env:
+          INPUT_FILE: ${{ inputs.file }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["INPUT_FILE"]).resolve()
+          if path.parent != Path(".announcements").resolve() or path.suffix != ".json":
+              raise ValueError("Expected a JSON file directly under .announcements/")
+          content = json.loads(path.read_text(encoding="utf-8"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("content=" + json.dumps(content) + "\n")
+          PY
+
+  announce:
+    needs: prepare
+    # Tracks the branch under test; production callers pin a commit SHA.
+    uses: svrnm/shared-workflows/.github/workflows/announcements.yml@feat/announcement-workflow
+    with:
+      announcement: ${{ needs.prepare.outputs.content }}
+      channels: ${{ inputs.channels || vars.ANNOUNCEMENT_CHANNELS }}
+      targets: ${{ vars.ANNOUNCEMENT_TARGETS }}
+      mode: ${{ inputs.mode }}
+      groupsio_host: groups.io
+      reddit_user_agent: ${{ vars.REDDIT_USER_AGENT }}
+    secrets:
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GROUPSIO_API_KEY: ${{ secrets.GROUPSIO_API_KEY }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_REFRESH_TOKEN: ${{ secrets.REDDIT_REFRESH_TOKEN }}
