@@ -13,8 +13,8 @@ on:
         type: string
       mode:
         type: choice
-        options: [dry-run, draft]
-        default: dry-run
+        options: [check, draft]
+        default: check
 
 permissions:
   contents: read

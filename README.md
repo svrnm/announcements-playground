@@ -44,10 +44,10 @@ which GitHub-hosted runners provide.
 ## Workflows with JSON files
 
 - **Announce manually** (`announce-manual.yml`): `workflow_dispatch` with a
-  file, optional channel list, and mode (default `dry-run`).
+  file, optional channel list, and mode (default `check`).
 - **Announce new files** (`announce-files.yml`): runs for files newly added to
   `.announcements/` on `main`. It uses the mode in the
-  `ANNOUNCEMENT_AUTO_MODE` variable and falls back to `dry-run`.
+  `ANNOUNCEMENT_AUTO_MODE` variable and falls back to `check`.
 
 All workflows refuse `publish`: the playground only creates drafts. In
 `draft` mode, Buffer and Groups.io create native drafts and Slack is only
@@ -65,7 +65,7 @@ service as its test account becomes available.
 | -------- | ------- |
 | `ANNOUNCEMENT_CHANNELS` | `["slack","groupsio"]` |
 | `ANNOUNCEMENT_TARGETS` | `{"slack":["C0123456789"],"groupsio":[12345]}` |
-| `ANNOUNCEMENT_AUTO_MODE` | `draft` (unset means `dry-run`) |
+| `ANNOUNCEMENT_AUTO_MODE` | `draft` (unset means `check`) |
 | `SITE_URL` | `https://example.netlify.app` (the Netlify site address) |
 | `ANNOUNCEMENT_WAIT_MINUTES` | `30` (unset means 30, at most 120) |
 

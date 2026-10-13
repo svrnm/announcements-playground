@@ -14,8 +14,8 @@ on:
         type: string
       mode:
         type: choice
-        options: [dry-run, draft]
-        default: dry-run
+        options: [check, draft]
+        default: check
 
 permissions:
   contents: read
@@ -37,7 +37,7 @@ jobs:
           POST: ${{ inputs.post }}
           BASE: ${{ github.event.before }}
           SITE_URL: ${{ vars.SITE_URL }}
-          MODE: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+          MODE: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'check' }}
         run: python3 .github/scripts/blog_announcements.py
 
   announce:
@@ -55,7 +55,7 @@ jobs:
       announcement: ${{ toJSON(matrix.entry.content) }}
       channels: ${{ vars.ANNOUNCEMENT_CHANNELS }}
       targets: ${{ vars.ANNOUNCEMENT_TARGETS }}
-      mode: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+      mode: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'check' }}
       # Netlify builds the site after the merge; wait before asking for approval.
       wait_for_url_minutes: ${{ fromJSON(vars.ANNOUNCEMENT_WAIT_MINUTES || '30') }}
       groupsio_host: groups.io

@@ -24,7 +24,7 @@ jobs:
       - id: files
         env:
           BEFORE: ${{ github.event.before }}
-          MODE: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+          MODE: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'check' }}
           CHANNELS: ${{ vars.ANNOUNCEMENT_CHANNELS }}
         run: |
           python3 - <<'PY'
@@ -74,8 +74,8 @@ jobs:
       announcement: ${{ toJSON(matrix.entry.content) }}
       channels: ${{ vars.ANNOUNCEMENT_CHANNELS }}
       targets: ${{ vars.ANNOUNCEMENT_TARGETS }}
-      # The README example drafts automatically; stay in dry-run until accounts exist.
-      mode: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+      # The README example drafts automatically; stay in check mode until accounts exist.
+      mode: ${{ vars.ANNOUNCEMENT_AUTO_MODE || 'check' }}
       groupsio_host: groups.io
       report_name: ${{ matrix.entry.name }}
     secrets:
