@@ -15,7 +15,6 @@ import sys
 BLOG = "content/en/blog/"
 # Lowercase names keep the derived URL identical to Hugo's.
 SEGMENTS = re.compile(r"[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*")
-BUFFER_CHANNELS = {"linkedin", "bluesky", "mastodon"}
 
 
 class PostError(Exception):
@@ -92,11 +91,9 @@ def main():
     else:
         paths = changed_posts(os.environ["BASE"], os.environ["GITHUB_SHA"], "A")
 
-    mode = os.environ.get("MODE", "check")
-    buffer = BUFFER_CHANNELS & set(json.loads(os.environ.get("CHANNELS") or "[]"))
-    if mode == "publish" and buffer:
-        # Buffer is drafts-only in this playground until draft behavior is verified.
-        raise SystemExit(f"publish is not allowed for Buffer channels: {sorted(buffer)}")
+    if os.environ.get("MODE") == "publish":
+        # The playground only creates drafts; nothing is published.
+        raise SystemExit("publish is not allowed in the playground; use draft")
 
     entries, errors = [], []
     for path in paths:

@@ -13,7 +13,7 @@ on:
         type: string
       mode:
         type: choice
-        options: [dry-run, draft, publish]
+        options: [dry-run, draft]
         default: dry-run
 
 permissions:
@@ -39,10 +39,9 @@ jobs:
           import os
           from pathlib import Path
 
-          # Buffer is drafts-only in this playground until draft behavior is verified.
-          buffer = {"linkedin", "bluesky", "mastodon"} & set(json.loads(os.environ["CHANNELS"]))
-          if os.environ["MODE"] == "publish" and buffer:
-              raise SystemExit(f"publish is not allowed for Buffer channels: {sorted(buffer)}")
+          # The playground only creates drafts; nothing is published.
+          if os.environ["MODE"] == "publish":
+              raise SystemExit("publish is not allowed in the playground; use draft")
 
           path = Path(os.environ["INPUT_FILE"]).resolve()
           if path.parent != Path(".announcements").resolve() or path.suffix != ".json":

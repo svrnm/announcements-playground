@@ -33,10 +33,9 @@ jobs:
           from pathlib import Path
           import subprocess
 
-          # Buffer is drafts-only in this playground until draft behavior is verified.
-          buffer = {"linkedin", "bluesky", "mastodon"} & set(json.loads(os.environ["CHANNELS"]))
-          if os.environ["MODE"] == "publish" and buffer:
-              raise SystemExit(f"publish is not allowed for Buffer channels: {sorted(buffer)}")
+          # The playground only creates drafts; nothing is published.
+          if os.environ["MODE"] == "publish":
+              raise SystemExit("publish is not allowed in the playground; use draft")
 
           root = Path(".announcements").resolve()
           if set(os.environ["BEFORE"]) == {"0"}:

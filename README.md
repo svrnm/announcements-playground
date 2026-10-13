@@ -49,9 +49,9 @@ which GitHub-hosted runners provide.
   `.announcements/` on `main`. It uses the mode in the
   `ANNOUNCEMENT_AUTO_MODE` variable and falls back to `dry-run`.
 
-Both workflows refuse `publish` when a Buffer channel (`linkedin`, `bluesky`,
-`mastodon`) is selected. Buffer stays drafts-only until its draft behavior is
-verified, and the queues of the test channels are paused as a second safeguard.
+All workflows refuse `publish`: the playground only creates drafts. In
+`draft` mode, Buffer and Groups.io create native drafts and Slack is only
+previewed in the job summary.
 
 Both call the workflow at `@feat/announcement-workflow` so changes on the
 branch can be tested without re-pinning.
@@ -73,7 +73,7 @@ service as its test account becomes available.
 
 | Service | Destination | Status |
 | ------- | ----------- | ------ |
-| Netlify | Site built from `main` | Not set up |
+| Netlify | https://announcements-playground.netlify.app | Set up |
 | Slack | Private test channel in CNCF Slack via Workflow Builder webhook | Set up |
 | Groups.io | `severin-test-group@groups.io` | Set up |
 | Buffer: Bluesky | Test account | Not set up |

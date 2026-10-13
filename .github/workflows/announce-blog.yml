@@ -14,7 +14,7 @@ on:
         type: string
       mode:
         type: choice
-        options: [dry-run, draft, publish]
+        options: [dry-run, draft]
         default: dry-run
 
 permissions:
@@ -38,7 +38,6 @@ jobs:
           BASE: ${{ github.event.before }}
           SITE_URL: ${{ vars.SITE_URL }}
           MODE: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
-          CHANNELS: ${{ vars.ANNOUNCEMENT_CHANNELS }}
         run: python3 .github/scripts/blog_announcements.py
 
   announce:
