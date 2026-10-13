@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if not .IsHome }}{{ .Title }} | {{ end }}{{ site.Title }}</title>
+  <style>
+    body { font: 1rem/1.6 system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; color: #222; background: #fff; }
+    a { color: #425cc7; }
+    .meta { color: #666; font-size: .9rem; }
+    aside { border-left: 3px solid #f5a800; padding: .25rem 1rem; background: #fff8e6; }
+  </style>
+</head>
+<body>
+  <header><a href="{{ "/" | relURL }}">{{ site.Title }}</a> · <a href="{{ "/blog/" | relURL }}">Blog</a></header>
+  <main>{{ block "main" . }}{{ end }}</main>
+</body>
+</html>

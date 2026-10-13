@@ -8,7 +8,40 @@ Nothing here posts to real OpenTelemetry channels.
 This repository is public on purpose. It shows exactly what a public caller,
 such as `opentelemetry.io`, exposes in its logs, job summaries, and artifacts.
 
-## Workflows
+## Blog flow
+
+The playground is a minimal Hugo site with the same content layout as
+`opentelemetry.io` (`content/en/blog/YYYY/slug/index.md` served at
+`/blog/YYYY/slug/`), deployed by Netlify (`netlify.toml`).
+
+A post opts in to being announced with an `announcement` block in its front
+matter. The blurb is the only announcement-specific text; the title comes from
+the post and the URL from its path:
+
+```yaml
+---
+title: Testing blog announcements
+date: 2026-10-13
+announcement:
+  text: >-
+    A short blurb that goes to every channel, followed by the link.
+---
+```
+
+- **Check blog announcements** (`check-blog.yml`): on pull requests, validates
+  the block of new or changed posts and the length limit of every channel
+  (Bluesky allows 300 characters including the URL). The job summary shows
+  what each channel would receive. No secrets, nothing is sent.
+- **Announce blog posts** (`announce-blog.yml`): on push to `main`, announces
+  newly added posts that have the block. The shared workflow waits until the
+  post's URL returns 200 (up to `ANNOUNCEMENT_WAIT_MINUTES`, default 30), then
+  asks for approval and delivers. Edited, renamed, or draft posts are not
+  announced. `workflow_dispatch` repeats a single post.
+
+The front matter is read by `.github/scripts/blog_announcements.py` with `yq`,
+which GitHub-hosted runners provide.
+
+## Workflows with JSON files
 
 - **Announce manually** (`announce-manual.yml`): `workflow_dispatch` with a
   file, optional channel list, and mode (default `dry-run`).
@@ -33,13 +66,16 @@ service as its test account becomes available.
 | `ANNOUNCEMENT_CHANNELS` | `["slack","groupsio"]` |
 | `ANNOUNCEMENT_TARGETS` | `{"slack":["C0123456789"],"groupsio":[12345]}` |
 | `ANNOUNCEMENT_AUTO_MODE` | `draft` (unset means `dry-run`) |
+| `SITE_URL` | `https://example.netlify.app` (the Netlify site address) |
+| `ANNOUNCEMENT_WAIT_MINUTES` | `30` (unset means 30, at most 120) |
 
 ## Test destinations
 
 | Service | Destination | Status |
 | ------- | ----------- | ------ |
-| Slack | Test channel in CNCF Slack via incoming webhook | Not set up |
-| Groups.io | Moderated test group on groups.io | Not set up |
+| Netlify | Site built from `main` | Not set up |
+| Slack | Private test channel in CNCF Slack via Workflow Builder webhook | Set up |
+| Groups.io | `severin-test-group@groups.io` | Set up |
 | Buffer: Bluesky | Test account | Not set up |
 | Buffer: Mastodon | Test account | Not set up |
 | Buffer: LinkedIn | Test Page (draft only) | Not set up |

@@ -1,0 +1,9 @@
+# Mirrors the opentelemetry.io layout: English content in content/en, served
+# without a language prefix, blog posts at /blog/YYYY/slug/.
+baseURL = "https://example.org/"
+title = "Announcements playground"
+defaultContentLanguage = "en"
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]
+
+[languages.en]
+contentDir = "content/en"

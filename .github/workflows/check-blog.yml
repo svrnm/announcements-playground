@@ -1,0 +1,43 @@
+name: Check blog announcements
+
+# Validates the announcement block of new or changed posts in pull requests:
+# front matter, derived URL, and the length limit of every channel. No
+# environment, no secrets, and nothing is sent.
+on:
+  pull_request:
+    paths: ["content/en/blog/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      entries: ${{ steps.posts.outputs.entries }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: posts
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python3 .github/scripts/blog_announcements.py
+
+  check:
+    needs: prepare
+    if: needs.prepare.outputs.entries != '[]'
+    name: ${{ matrix.entry.path }}
+    strategy:
+      fail-fast: false
+      matrix:
+        entry: ${{ fromJSON(needs.prepare.outputs.entries) }}
+    uses: svrnm/shared-workflows/.github/workflows/announcements.yml@feat/announcement-workflow
+    with:
+      announcement: ${{ toJSON(matrix.entry.content) }}
+      channels: '["linkedin","bluesky","mastodon","slack","groupsio"]'
+      targets: "{}"
+      mode: check

@@ -1,0 +1,67 @@
+name: Announce blog posts
+
+# New blog posts on main with an `announcement` front matter block are
+# announced once the post is live. Use workflow_dispatch to repeat one post.
+on:
+  push:
+    branches: [main]
+    paths: ["content/en/blog/**"]
+  workflow_dispatch:
+    inputs:
+      post:
+        description: Post path, for example content/en/blog/2026/example/index.md
+        required: true
+        type: string
+      mode:
+        type: choice
+        options: [dry-run, draft, publish]
+        default: dry-run
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      entries: ${{ steps.posts.outputs.entries }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: posts
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          POST: ${{ inputs.post }}
+          BASE: ${{ github.event.before }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          MODE: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+          CHANNELS: ${{ vars.ANNOUNCEMENT_CHANNELS }}
+        run: python3 .github/scripts/blog_announcements.py
+
+  announce:
+    needs: prepare
+    if: needs.prepare.outputs.entries != '[]'
+    name: ${{ matrix.entry.path }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        entry: ${{ fromJSON(needs.prepare.outputs.entries) }}
+    # Tracks the branch under test; production callers pin a commit SHA.
+    uses: svrnm/shared-workflows/.github/workflows/announcements.yml@feat/announcement-workflow
+    with:
+      announcement: ${{ toJSON(matrix.entry.content) }}
+      channels: ${{ vars.ANNOUNCEMENT_CHANNELS }}
+      targets: ${{ vars.ANNOUNCEMENT_TARGETS }}
+      mode: ${{ inputs.mode || vars.ANNOUNCEMENT_AUTO_MODE || 'dry-run' }}
+      # Netlify builds the site after the merge; wait before asking for approval.
+      wait_for_url_minutes: ${{ fromJSON(vars.ANNOUNCEMENT_WAIT_MINUTES || '30') }}
+      groupsio_host: groups.io
+      report_name: ${{ matrix.entry.name }}
+    secrets:
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GROUPSIO_API_KEY: ${{ secrets.GROUPSIO_API_KEY }}
